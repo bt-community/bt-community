@@ -35,13 +35,23 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticate(@RequestBody User request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+    public ResponseEntity<?> authenticate(@RequestBody User request) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            // IMPORTANT: prevent Spring Security from returning raw 403
+            return ResponseEntity
+                    .status(401)
+                    .body("Invalid email or password");
+        }
 
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow();
 
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("fullName", user.getFullName());
@@ -51,6 +61,7 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(token);
     }
+
 
     // --- NEW ENDPOINT: Forgot Password ---
     @PostMapping("/forgot-password")
