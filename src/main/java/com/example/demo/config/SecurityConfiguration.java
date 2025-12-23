@@ -27,7 +27,7 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
 
     // Inject from application.properties / environment variable
-    @Value("${cors.allowed.origins:http://localhost:8081}")
+    @Value("${cors.allowed.origins=https://bt-community.github.io}")
     private String allowedOrigins;
 
     @Bean
