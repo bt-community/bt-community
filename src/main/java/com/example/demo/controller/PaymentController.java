@@ -39,10 +39,20 @@ public class PaymentController {
     @PostMapping("/verify")
     public ResponseEntity<?> verifyPayment(@RequestBody Map<String, String> paymentResponse) {
         try {
-            paymentService.verifyAndSavePayment(paymentResponse);
+            String email = SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getName();
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            paymentService.verifyAndSavePayment(paymentResponse, user);
+
             return ResponseEntity.ok(Map.of("message", "Payment processed successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Verification Failed: " + e.getMessage());
         }
     }
+
 }
