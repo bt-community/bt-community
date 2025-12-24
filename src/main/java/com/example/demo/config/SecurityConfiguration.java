@@ -61,15 +61,24 @@ public class SecurityConfiguration {
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
 
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin"
+        ));
 
-        configuration.setAllowCredentials(false); // IMPORTANT
+        configuration.setExposedHeaders(List.of(
+                "Authorization"
+        ));
+
+        configuration.setAllowCredentials(true); // ← THIS is mandatory
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
 
 }
