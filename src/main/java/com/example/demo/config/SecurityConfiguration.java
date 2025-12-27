@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/reviews").permitAll()
                         .requestMatchers("/api/v1/reviews/**").authenticated()
                         .requestMatchers("/api/v1/payment/**").authenticated()
+                        .requestMatchers("/api/v1/subscription/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

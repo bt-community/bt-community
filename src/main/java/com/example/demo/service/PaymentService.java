@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Payment;
+import com.example.demo.entity.Subscription;
 import com.example.demo.entity.User;
 import com.example.demo.repository.PaymentRepository;
+import com.example.demo.repository.SubscriptionRepository;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -21,7 +24,7 @@ public class PaymentService {
 
     private final RazorpayClient razorpayClient;
     private final PaymentRepository paymentRepository;
-
+    private final SubscriptionRepository subscriptionRepository;
     @Value("${razorpay.key.secret}")
     private String keySecret;
 
@@ -93,6 +96,51 @@ public class PaymentService {
         payment.setStatus("SUCCESS");
 
         paymentRepository.save(payment);
+        // 5. Create/Update Subscription
+        createOrUpdateSubscription(payment, user);
     }
+    private void createOrUpdateSubscription(Payment payment, User user) {
+        // Deactivate old subscription if exists
+        subscriptionRepository.findByUserAndActiveTrue(user)
+                .ifPresent(sub -> {
+                    sub.setActive(false);
+                    subscriptionRepository.save(sub);
+                });
 
+        // Determine plan name and duration from amount
+        String planName;
+        int durationMonths;
+
+        double amount = payment.getAmount();
+        if (amount == 1999.0) {
+            planName = "1 Month";
+            durationMonths = 1;
+        } else if (amount == 4999.0) {
+            planName = "3 Months";
+            durationMonths = 3;
+        } else if (amount == 9999.0) {
+            planName = "6 Months";
+            durationMonths = 6;
+        } else if (amount == 17999.0) {
+            planName = "12 Months";
+            durationMonths = 12;
+        } else {
+            throw new RuntimeException("Invalid plan amount");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime endDate = now.plusMonths(durationMonths);
+
+        Subscription subscription = Subscription.builder()
+                .user(user)
+                .planName(planName)
+                .amount(amount)
+                .startDate(now)
+                .endDate(endDate)
+                .active(true)
+                .payment(payment)
+                .build();
+
+        subscriptionRepository.save(subscription);
+    }
 }
