@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Payment;
 import com.example.demo.entity.User;
 import com.example.demo.repository.PaymentRepository;
+import com.example.demo.repository.UserRepository;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -21,6 +23,8 @@ public class PaymentService {
 
     private final RazorpayClient razorpayClient;
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository; // ← ADD THIS
+
 
     @Value("${razorpay.key.secret}")
     private String keySecret;
@@ -87,12 +91,17 @@ public class PaymentService {
             throw new RuntimeException("Payment does not belong to this user");
         }
 
-        // 4. Update payment status
-        payment.setRazorpayPaymentId(paymentId);
-        payment.setRazorpaySignature(signature);
-        payment.setStatus("SUCCESS");
+        user.setSubscriptionActive(true);
+        user.setSubscriptionPlan(
+                payment.getAmount() == 1999 ? "1 Month" :
+                        payment.getAmount() == 4999 ? "3 Months" :
+                                payment.getAmount() == 9999 ? "6 Months" :
+                                        "12 Months"
+        );
+        user.setSubscriptionStart(LocalDateTime.now());
+        userRepository.save(user);
 
-        paymentRepository.save(payment);
+
     }
 
 }
