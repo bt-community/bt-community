@@ -40,16 +40,6 @@ public class User implements UserDetails {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "subscription_active")
-    private boolean subscriptionActive = false;
-
-    @Column(name = "subscription_plan")
-    private String subscriptionPlan;
-
-    @Column(name = "subscription_start")
-    private LocalDateTime subscriptionStart;
-
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(); // You can add roles here later (e.g., SimpleGrantedAuthority)
