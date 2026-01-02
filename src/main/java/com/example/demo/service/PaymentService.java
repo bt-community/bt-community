@@ -112,16 +112,16 @@ public class PaymentService {
         int durationMonths;
 
         double amount = payment.getAmount();
-        if (amount == 1699.0) {
+        if (amount == 1999.0) {
             planName = "1 Month";
             durationMonths = 1;
-        } else if (amount == 3999.0) {
+        } else if (amount == 4999.0) {
             planName = "3 Months";
             durationMonths = 3;
-        } else if (amount == 8499.0) {
+        } else if (amount == 9999.0) {
             planName = "6 Months";
             durationMonths = 6;
-        } else if (amount == 14999.0) {
+        } else if (amount == 17999.0) {
             planName = "12 Months";
             durationMonths = 12;
         } else {
